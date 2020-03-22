@@ -36,11 +36,56 @@ private:
 	void UpdateModel();
 	/********************************/
 	/*  User Functions              */
+
+	void DrawFace(int x, int y);
+	void DrawGoods(int x, int y);
+	int ClampScreenX(int x, int width);
+	int ClampScreenY(int x, int height);
+	bool IsColliding(int x0, int y0, int width0, int height0,
+		int x1, int y1, int width1, int height1);
+
+	void DrawGameOver(int x, int y);
+
+	void DrawTitleScreen(int x, int y);
+
+
 	/********************************/
 private:
 	MainWindow& wnd;
 	Graphics gfx;
 	/********************************/
 	/*  User Variables              */
+
+	int collectorX=400;
+	int collectorY=300;
+
+	int collectorWidth = 20;
+	int collectorHeight = 20;
+
+
+	bool goods1IsEaten = false;
+	int goods1X=100;
+	int goods1Y=150;
+
+	bool goods2IsEaten = false;
+	int goods2X=600;
+	int goods2Y=400;
+
+	bool goods3IsEaten = false;
+	int goods3X=100;
+	int goods3Y=500;
+
+	int goodsWidth = 24;
+	int goodsHeight = 24;
+
+	int g1vx = 1;
+	int g1vy = 1;
+
+	int g2vx = 1;
+	int g2vy = 1;
+
+	int g3vx = 1;
+	int g3vy = 1;
+	bool isStarted = false;
 	/********************************/
 };
