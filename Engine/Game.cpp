@@ -21,7 +21,8 @@
 #include "MainWindow.h"
 #include "Game.h"
 #include <random>
-
+#include "goods.h"
+#include"collector.h"
 
 Game::Game(MainWindow& wnd)
 	:
@@ -32,13 +33,20 @@ Game::Game(MainWindow& wnd)
 	std::random_device rd;
 	std::mt19937 rng(rd());
 	std::uniform_int_distribution<int> xDist(0,770);
-	std::uniform_int_distribution<int> yDist(0, 770);
-	goods1X = xDist(rng);
-	goods1Y = yDist(rng);
-	goods2X = xDist(rng);
-	goods2Y = yDist(rng);
-	goods3X = xDist(rng);
-	goods3Y = yDist(rng);
+	std::uniform_int_distribution<int> yDist(0, 570);
+	goods1.x = xDist(rng);
+	goods1.y = yDist(rng);
+	goods2.x = xDist(rng);
+	goods2.y = yDist(rng);
+	goods3.x = xDist(rng);
+	goods3.y = yDist(rng);
+
+	goods1.vx = 1;
+	goods1.vy = 1;
+	goods2.vx = -1;
+	goods2.vy = 1;
+	goods3.vx = 1;
+	goods3.vy = -1;
 }
 
 void Game::Go()
@@ -53,82 +61,27 @@ void Game::UpdateModel()
 {
 	if (isStarted) {
 		if (wnd.kbd.KeyIsPressed(VK_RIGHT)) {
-			collectorX += 1;
+			c1.x += 1;
 		}
 		if (wnd.kbd.KeyIsPressed(VK_LEFT)) {
-			collectorX -= 1;
+			c1.x -= 1;
 		}
 		if (wnd.kbd.KeyIsPressed(VK_UP)) {
-			collectorY -= 1;
+			c1.y -= 1;
 		}
 		if (wnd.kbd.KeyIsPressed(VK_DOWN)) {
-			collectorY += 1;
+			c1.y += 1;
 		}
 
-		collectorX = ClampScreenX(collectorX, collectorWidth);
-		collectorY = ClampScreenY(collectorY, collectorHeight);
+		c1.ClampScreen();
 
-		goods1X += g1vx;
-		goods1Y += g1vy;
-		goods2X += g2vx;
-		goods2Y += g2vy;
-		goods3X += g3vx;
-		goods3Y += g3vy;
+		goods1.Update();
+		goods2.Update();
+		goods3.Update();
 
-		{
-			const int goods1Xold = goods1X;
-			const int goods1Yold = goods1Y;
-
-			goods1X = ClampScreenX(goods1X, goodsWidth);
-			if (goods1X != goods1Xold) {
-				g1vx = -g1vx;
-			}
-			goods1Y = ClampScreenY(goods1Y, goodsHeight);
-			if (goods1Y != goods1Yold) {
-				g1vy = -g1vy;
-			}
-		}
-
-		{
-			const int goods2Xold = goods2X;
-			const int goods2Yold = goods2Y;
-
-			goods2X = ClampScreenX(goods2X, goodsWidth);
-			if (goods1X != goods2Xold) {
-				g2vx = -g2vx;
-			}
-			goods2Y = ClampScreenY(goods2Y, goodsHeight);
-			if (goods2Y != goods2Yold) {
-				g2vy = -g2vy;
-			}
-		}
-
-		{
-			const int goods3Xold = goods3X;
-			const int goods3Yold = goods3Y;
-
-			goods3X = ClampScreenX(goods3X, goodsWidth);
-			if (goods3X != goods3Xold) {
-				g3vx = -g3vx;
-			}
-			goods3Y = ClampScreenY(goods3Y, goodsHeight);
-			if (goods3Y != goods3Yold) {
-				g3vy = -g3vy;
-			}
-		}
-
-
-		if (IsColliding(collectorX, collectorY, collectorHeight, collectorWidth, goods1X, goods1Y, goodsWidth, goodsHeight)) {
-			goods1IsEaten = true;
-		}
-
-		if (IsColliding(collectorX, collectorY, collectorHeight, collectorWidth, goods2X, goods2Y, goodsWidth, goodsHeight)) {
-			goods2IsEaten = true;
-		}
-
-		if (IsColliding(collectorX, collectorY, collectorHeight, collectorWidth, goods3X, goods3Y, goodsWidth, goodsHeight)) {
-			goods3IsEaten = true;
-		}
+		goods1.ProcesssConsumption(c1.x, c1.y, c1.width, c1.height);
+		goods2.ProcesssConsumption(c1.x, c1.y, c1.width, c1.height);
+		goods3.ProcesssConsumption(c1.x, c1.y, c1.width, c1.height);
 	}
 	else
 	{
@@ -693,49 +646,6 @@ void Game::DrawGoods(int x, int y)
 	gfx.PutPixel(5 + x, 23 + y, 51, 28, 0);
 	gfx.PutPixel(6 + x, 23 + y, 51, 28, 0);
 
-
-}
-
-int Game::ClampScreenX(int x, int width)
-{
-	const int right = x + width;
-	if (x < 0) {
-		return 0;
-	}
-	else if (right >= gfx.ScreenWidth) {
-		return (gfx.ScreenWidth - 1) - width;
-	}
-	else {
-		return x;
-	}
-}
-
-int Game::ClampScreenY(int y, int height)
-{
-	const int bottom = y + height;
-	if (y < 0) {
-		return 0;
-	}
-	else if (bottom >= gfx.ScreenHeight) {
-		return (gfx.ScreenHeight - 1) - height;
-	}
-	else {
-		return y;
-	}
-}
-
-bool Game::IsColliding(int x0, int y0, int width0, int height0, int x1, int y1, int width1, int height1)
-{
-	const int right0 = x0 + width0;
-	const int bottom0 = y0 + height0;
-	const int right1 = x1 + width1;
-	const int bottom1 = y1 + height1;
-
-	return
-		right0 >= x1 &&
-		x0 <= right1 &&
-		bottom0 >= y1 &&
-		y0 <= bottom1;
 
 }
 
@@ -29095,19 +29005,19 @@ void Game::ComposeFrame()
 	else {
 
 
-		if (goods1IsEaten && goods2IsEaten && goods3IsEaten) {
+		if (goods1.isEaten && goods2.isEaten && goods3.isEaten) {
 			DrawGameOver(358, 268);
 		}
 
-		DrawFace(collectorX, collectorY);
-		if (!goods1IsEaten) {
-			DrawGoods(goods1X, goods1Y);
+		DrawFace(c1.x, c1.y);
+		if (!goods1.isEaten) {
+			DrawGoods(goods1.x, goods1.y);
 		}
-		if (!goods2IsEaten) {
-			DrawGoods(goods2X, goods2Y);
+		if (!goods2.isEaten) {
+			DrawGoods(goods2.x, goods2.y);
 		}
-		if (!goods3IsEaten) {
-			DrawGoods(goods3X, goods3Y);
+		if (!goods3.isEaten) {
+			DrawGoods(goods3.x, goods3.y);
 		}
 	}
 }
