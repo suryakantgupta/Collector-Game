@@ -40,9 +40,6 @@ private:
 	/********************************/
 	/*  User Functions              */
 
-	void DrawFace(int x, int y);
-	void DrawGoods(int x, int y);
-
 	void DrawGameOver(int x, int y);
 
 	void DrawTitleScreen(int x, int y);

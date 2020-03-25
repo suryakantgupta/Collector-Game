@@ -1,9 +1,11 @@
 #pragma once
-
+#include"Graphics.h"
+#include "Collector.h"
 class Goods {
 public:
 	void Update();
-	void ProcesssConsumption(int cx, int cy, int cw, int ch);
+	void ProcesssConsumption(const Collector &c1);
+	void Draw( Graphics &gfx) const;
 		int x;
 		int y;
 		int vx;
